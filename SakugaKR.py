@@ -19,7 +19,7 @@ class SakugaKR(DockWidget):
         self.setWindowTitle("SakugaKR") 
 
         self.nameLabel = QLabel(self)
-        self.nameLabel.setText('Name:')
+        self.nameLabel.setText('Path:')
         self.line = QLineEdit(self)
         self.line.setText("Path to parent folder with layer folder names inside it")
 
