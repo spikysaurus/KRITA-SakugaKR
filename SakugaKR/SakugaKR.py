@@ -21,21 +21,27 @@ class SakugaKR(DockWidget):
         self.nameLabel = QLabel(self)
         self.nameLabel.setText('Path:')
         self.line = QLineEdit(self)
-        self.line.setText("Path to parent folder with layer folder names inside it")
+        self.line.setText("Export Folder Path")
 
         self.line.move(80, 20)
         self.line.resize(200, 32)
         self.nameLabel.move(20, 20)
 
-        pybutton = QPushButton('Import', self)
+        pybutton = QPushButton('Create Layers', self)
         pybutton.clicked.connect(self.clickMethod)
-        pybutton.resize(200,32)
-        pybutton.move(80, 60)        
+        pybutton.resize(100,32)
+        pybutton.move(80, 60)    
 
-    def clickMethod(self):
+        pybutton2 = QPushButton('Import Images', self)
+        pybutton2.clicked.connect(self.clickMethod2)
+        pybutton2.resize(100,32)
+        pybutton2.move(180, 60)      
+
+    def clickMethod2(self):
         target_directory = self.line.text()
         app = Krita.instance()
         document = app.activeDocument() 
+        currentLayer = document.activeNode()
 
         if not os.path.isdir(target_directory):
             print(f"Directory not found at {target_directory}")
@@ -43,37 +49,46 @@ class SakugaKR(DockWidget):
             for item in os.listdir(target_directory):
                 arr = []
                 arr.append(item)
-                if document:
-                    if document.nodeByName(item) == None:
-                        newLayer = document.createNode(str(item), "paintLayer")
-                        document.rootNode().addChildNode(newLayer, None)
-                        newLayer.enableAnimation()
-                    else: 
-                        currentLayer = document.activeNode()
-                        for folderLayer in arr:
-                            if currentLayer == document.nodeByName(folderLayer):
-                                item_path = os.path.join(target_directory, folderLayer)
-                        
-                                imageSequence = []
-                                image_sequence_path = item_path
-                                files = os.listdir(image_sequence_path)
-                                for filename in files:
-                                    if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
-                                        imageSequence.append(
-                                            ( int(Path(filename).stem) ,os.path.join(image_sequence_path, filename)    ))
-                                    imageSequence.sort()
 
-                                    for i in imageSequence:
-                                        document.setCurrentTime(int(Path(filename).stem))
+                if currentLayer.name() in arr: 
+                    item_path = os.path.join(target_directory, currentLayer.name())
+                    imageSequence = []
+                    image_sequence_path = item_path
+                    files = os.listdir(image_sequence_path)
+                    for filename in files:
+                        if filename.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.tiff')):
+                            imageSequence.append(( int(Path(filename).stem) ,os.path.join(image_sequence_path, filename)  ))
+                        imageSequence.sort()
 
-                                        add_blank_frame_action = Krita.instance().action("add_blank_frame")
-                                        add_blank_frame_action.trigger()
+                        for i in imageSequence:
+                            document.setCurrentTime(int(Path(filename).stem))
 
-                                        image = QImage(str(os.path.join(image_sequence_path, filename)))
-                                        pixelData = bytes(image.constBits().asarray(image.byteCount()))
-                                        currentLayer.setPixelData(pixelData, 0, 0, image.width(), image.height())
-                            else : pass
-                else : pass
+                            add_blank_frame_action = Krita.instance().action("add_blank_frame")
+                            add_blank_frame_action.trigger()
+
+                            image = QImage(str(os.path.join(image_sequence_path, filename)))
+                            pixelData = bytes(image.constBits().asarray(image.byteCount()))
+                            currentLayer.setPixelData(pixelData, 0, 0, image.width(), image.height())
+
+    def clickMethod(self):
+        target_directory = self.line.text()
+        app = Krita.instance()
+        document = app.activeDocument() 
+        currentLayer = document.activeNode()
+
+        if not os.path.isdir(target_directory):
+            print(f"Directory not found at {target_directory}")
+        else:
+            for item in os.listdir(target_directory):
+                arr = []
+                arr.append(item)
+                
+                if currentLayer.name() not in arr:
+                    newLayer = document.createNode(str(item), "paintLayer")
+                    document.rootNode().addChildNode(newLayer, None)
+                    newLayer.enableAnimation()
+                    
+
 
     def canvasChanged(self, canvas):
         pass
