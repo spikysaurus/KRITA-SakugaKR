@@ -2,7 +2,7 @@
 
 A Krita docker plugin for 2D Animation, with features : <br>
 <ul>
-  <li>Drawing Camera Stamps</li>
+  <li>Stamps Camera Frame</li>
   <li>Auto Create Animation Layers and Import Animation Keyframes into them</li>
 </ul>
 <h2>How to Install</h2>
